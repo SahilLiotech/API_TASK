@@ -1,0 +1,55 @@
+//These is demo that how can we parse API data and displayed in the LabelText
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:api_practical/test_provider.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TestProvider>(context, listen: false)
+          .loadAddressConfiguration();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Flutter Demo Home Page'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Consumer<TestProvider>(
+          builder: (context, provider, child) {
+            return Column(
+              children: <Widget>[
+                for (var i = 0; i < 7; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        labelText: i < provider.sortedAddressFields.length
+                            ? provider.sortedAddressFields[i]['custom_label']
+                            : 'Field ${i + 1}',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
