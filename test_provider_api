@@ -1,0 +1,35 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+class TestProvider with ChangeNotifier {
+  List<Map<String, dynamic>> sortedAddressFields = [];
+
+  Future<Map<String, dynamic>> fetchAddressConfiguration() async {
+    final response = await http.get(Uri.parse(
+        'https://www.foodchow.com/api/FoodChowWD/GetAddressConfigurationForShop?shop_id=3161'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load address configuration');
+    }
+  }
+
+  Future<void> loadAddressConfiguration() async {
+    final data = await fetchAddressConfiguration();
+    if (data['response_code'] == "1" && data['data'] != null) {
+      var fields = json.decode(data['data']) as List;
+      sortedAddressFields = fields
+          .map((item) => {
+                'custom_label': item['custom_label'],
+                'display_position': item['display_position'],
+              })
+          .toList();
+
+      sortedAddressFields.sort((a, b) => (a['display_position'] as int)
+          .compareTo(b['display_position'] as int));
+    }
+    notifyListeners();
+  }
+}
